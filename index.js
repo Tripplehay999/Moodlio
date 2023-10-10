@@ -53,6 +53,7 @@ const signInButtonEl = document.getElementById("sign-in-btn")
 const createAccountButtonEl = document.getElementById("create-account-btn")
 
 const signOutButtonEl = document.getElementById("sign-out-btn")
+const settingsButtonEl = document.getElementById("settings-btn")
 
 const userProfilePictureEl = document.getElementById("user-profile-picture")
 const userGreetingEl = document.getElementById("user-greeting")
@@ -419,16 +420,72 @@ function showProfilePicture(imgElement, user) {
 }
 
 function showUserGreeting(element, user) {
-    const displayName = user.displayName
-    
-    if (displayName) {
-        const userFirstName = displayName.split(" ")[0]
-        
-        element.textContent = `Hey ${userFirstName}, how are you?`
-    } else {
-        element.textContent = `Hey friend, how are you?`
+    const displayName = user.displayName;
+    const currentDate = new Date();
+    const currentHour = currentDate.getHours();
+    let greeting;
+    let motivationalQuote;
+
+    // Define motivational quotes for each time of day
+    const morningQuotes = [
+        "Rise up, start fresh, see the bright opportunity in each new day.",
+        "The morning sun has a way of turning your worries into shadows.",
+        "Every morning brings new potential, but if you dwell on the misfortunes of the day before, you tend to overlook tremendous opportunities."
+    ];
+
+    const afternoonQuotes = [
+        "Success is not final, failure is not fatal: it is the courage to continue that counts. - Winston Churchill",
+        "The only way to do great work is to love what you do. - Steve Jobs",
+        "The afternoon knows what the morning never suspected. - Swedish Proverb"
+    ];
+
+    const eveningQuotes = [
+        "The evening's the best part of the day. You've done your day's work. Now you can put your feet up and enjoy it. - Kazuo Ishiguro",
+        "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
+        "Evenings are the beautifully sweet spot between the harsh light of the day and the dead darkness of night."
+    ];
+
+    // Function to select a random quote from an array
+    function getRandomQuote(quotesArray) {
+        const randomIndex = Math.floor(Math.random() * quotesArray.length);
+        return quotesArray[randomIndex];
     }
+
+    if (displayName) {
+        const userFirstName = displayName.split(" ")[0];
+
+        if (currentHour >= 5 && currentHour < 12) {
+            greeting = `Good morning, ${userFirstName}! How are you feeling today?`;
+            motivationalQuote = getRandomQuote(morningQuotes);
+        } else if (currentHour >= 12 && currentHour < 17) {
+            greeting = `Good afternoon, ${userFirstName}! How are you feeling today?`;
+            motivationalQuote = getRandomQuote(afternoonQuotes);
+        } else {
+            greeting = `Good evening, ${userFirstName}! How are you feeling today?`;
+            motivationalQuote = getRandomQuote(eveningQuotes);
+        }
+    } else {
+        if (currentHour >= 5 && currentHour < 12) {
+            greeting = `Good morning, friend! How are you feeling today?`;
+            motivationalQuote = getRandomQuote(morningQuotes);
+        } else if (currentHour >= 12 && currentHour < 17) {
+            greeting = `Good afternoon, friend! How are you feeling today?`;
+            motivationalQuote = getRandomQuote(afternoonQuotes);
+        } else {
+            greeting = `Good evening, friend! How are you feeling today?`;
+            motivationalQuote = getRandomQuote(eveningQuotes);
+        }
+    }
+
+    // Combine the greeting and motivational quote
+    const combinedMessage = `${greeting}<br><div class="quote">${motivationalQuote}</div>`;
+    element.innerHTML = combinedMessage;
+
+    //Reduce font of motivation
+    const quoteElement = element.querySelector('.quote');
+    quoteElement.style.fontSize = 'smaller';
 }
+
 
 function displayDate(firebaseDate) {
     if (!firebaseDate) {
@@ -527,3 +584,77 @@ function selectFilter(event) {
     
     fetchPostsFromPeriod(selectedFilterPeriod, user)
 }
+
+// Update Profile Picture
+const fileInput = document.getElementById('file-input');
+const userProfilePicture = document.getElementById('user-profile-picture');
+const profilePictureContainer = document.querySelector('.profile-picture-container');
+
+// Add an event listener to the file input to handle profile picture selection
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+        // Display the selected profile picture in the img element
+        const imageUrl = URL.createObjectURL(file);
+        userProfilePicture.src = imageUrl;
+
+        // Here, you can upload the new profile picture to Firebase Storage and update the user's profile as shown in the previous response
+    }
+});
+
+// Add an event listener to the profile picture container for hovering
+profilePictureContainer.addEventListener('mouseenter', () => {
+    profilePictureContainer.classList.add('hovered');
+});
+
+profilePictureContainer.addEventListener('mouseleave', () => {
+    profilePictureContainer.classList.remove('hovered');
+});
+
+// Add an event listener to the overlay for clicking
+const overlay = document.querySelector('.overlay');
+overlay.addEventListener('click', () => {
+    fileInput.click(); // Trigger the file input click when the overlay is clicked
+});
+
+anime.timeline({loop: true})
+  .add({
+    targets: '.ml5 .line',
+    opacity: [0.5,1],
+    scaleX: [0, 1],
+    easing: "easeInOutExpo",
+    duration: 700
+  }).add({
+    targets: '.ml5 .line',
+    duration: 600,
+    easing: "easeOutExpo",
+    translateY: (el, i) => (-0.625 + 0.625*2*i) + "em"
+  }).add({
+    targets: '.ml5 .ampersand',
+    opacity: [0,1],
+    scaleY: [0.5, 1],
+    easing: "easeOutExpo",
+    duration: 600,
+    offset: '-=600'
+  }).add({
+    targets: '.ml5 .letters-left',
+    opacity: [0,1],
+    translateX: ["0.5em", 0],
+    easing: "easeOutExpo",
+    duration: 600,
+    offset: '-=300'
+  }).add({
+    targets: '.ml5 .letters-right',
+    opacity: [0,1],
+    translateX: ["-0.5em", 0],
+    easing: "easeOutExpo",
+    duration: 600,
+    offset: '-=600'
+  }).add({
+    targets: '.ml5',
+    opacity: 0,
+    duration: 1000,
+    easing: "easeOutExpo",
+    delay: 1000
+  });

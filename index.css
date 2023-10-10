@@ -373,11 +373,16 @@ button:hover {
     cursor: pointer;
     padding: 0;
     width: 1.875em;
+    margin-left: 30px;
 }
+
 
 .icon-img-btn:hover {
     filter: invert(0.5);
 }
+
+
+ 
 
 /* === IDs === */
 
@@ -389,3 +394,95 @@ button:hover {
     display: none;
     margin: 0;
 }
+
+/* Style the profile picture container with overlay */
+.profile-picture-container {
+    position: relative;
+    max-width: 200px;
+    margin: 0 auto;
+}
+
+#user-profile-picture {
+    display: block;
+    width: 100%;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#user-profile-picture:hover {
+    transform: scale(1.05);
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.profile-picture-container:hover .overlay {
+    opacity: 1;
+    cursor: pointer;
+}
+
+label {
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+/* Hide the file input */
+#file-input {
+    display: none;
+}
+.ml5 {
+    position: relative;
+    font-weight: normal;
+    font-size: 40px;
+    color: #402d2d;
+  }
+  
+  .ml5 .text-wrapper {
+    position: relative;
+    display: inline-block;
+    padding-top: 0.1em;
+    padding-right: 0.05em;
+    padding-bottom: 0.15em;
+    line-height: 1em;
+  }
+  
+  .ml5 .line {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    height: 3px;
+    width: 100%;
+    background-color: #402d2d;
+    transform-origin: 0.5 0;
+  }
+  
+  .ml5 .ampersand {
+    font-family: Baskerville, serif;
+    font-style: italic;
+    font-weight: 400;
+    width: 1em;
+    margin-right: -0.1em;
+    margin-left: -0.1em;
+  }
+  
+  .ml5 .letters {
+    display: inline-block;
+    opacity: 0;
+  }
