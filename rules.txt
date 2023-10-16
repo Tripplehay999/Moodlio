@@ -19,3 +19,35 @@ service cloud.firestore {
     }
   }
 }
+
+
+
+
+Storage rules 
+rules_version = '2';
+
+// Craft rules based on data in your Firestore database
+// allow write: if firestore.get(
+//    /databases/(default)/documents/users/$(request.auth.uid)).data.isAdmin;
+service firebase.storage {
+  match /b/{bucket}/o {
+
+
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function userIsAuthorOfPost() {
+      return request.auth.uid == resource.data.uid;
+    }
+    
+    match /{document=**} {
+	    allow create: if isSignedIn();
+      allow read: if isSignedIn() && userIsAuthorOfPost();
+      allow update: if isSignedIn() && userIsAuthorOfPost();
+      allow delete: if isSignedIn() && userIsAuthorOfPost();
+    }
+  }
+}
+  

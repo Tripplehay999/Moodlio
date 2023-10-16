@@ -12,8 +12,15 @@
     </head>
  
     <body>
+        <div id="loader-container">
+            <div class="loader"></div>
+          </div>
         <section id="logged-out-view">
+           
+              
+               
             <div class="container">
+            
                 <h1 class="app-title">Moodlio</h1>
                 <h1 class="ml5">
                     <span class="text-wrapper">
@@ -32,13 +39,16 @@
                         Sign in with Google
                     </button>
                 </div>
-                
+        
+
                 <div class="auth-fields-and-buttons">
+                    <input id="username-input" type="text" placeholder="Name">
                     <input id="email-input" type="email" placeholder="Email">
                     <input id="password-input" type="password" placeholder="Password">
                     
                     <button id="sign-in-btn" class="primary-btn">Sign in</button>
                     <button id="create-account-btn" class="secondary-btn">Create Account</button>
+
                 </div>
                 
             </div>
@@ -49,13 +59,11 @@
             <div class="container">
                 <nav>
                     <button id="settings-btn" class="icon-btn">
-                        <a href="settings/settings.html">
                              <img src="assets/icons/settings.svg" class="icon-img-btn">
-                        </a>
                     </button>
 
                     <button id="sign-out-btn" class="icon-btn">
-                        <img src="assets/icons/icon-sign-out.svg" class="icon-img-btn">
+                        <img src="assets/icons/icon-sign-out.svg" class="icon-img-btn-2">
                     </button>
                     
                 </nav>
@@ -63,7 +71,7 @@
                 <div class="app-container">
                     <div class="user-section">
                         <div class="profile-picture-container">
-                            <img id="user-profile-picture" src="default-profile-image.jpg" alt="Profile Picture">
+                            <img id="user-profile-picture" src="assets/images/default-profile-picture.jpeg" alt="Profile Picture">
                             <div class="overlay">
                                 <label for="file-input">Change Picture</label>
                                 <input type="file" id="file-input" accept="image/*">
@@ -109,7 +117,10 @@
                             <button id="month-filter-btn" class="filter-btn">Month</button>
                             <button id="all-filter-btn" class="filter-btn">All</button>
                         </div>
-                        
+                        <audio id="background-audio" controls autoplay loop>
+                            <source src="chosic.mp3" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
                         <div id="posts" class="posts-section">
                         </div>
                     </div>
@@ -118,6 +129,13 @@
         </section>
         
         <script src="index.js" type="module"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js"></script>
+        <script>
+            window.addEventListener('load', () => {
+                document.getElementById('loader-container').style.display = 'none';
+            });
+        </script>
+        
     </body>
 
 </html>

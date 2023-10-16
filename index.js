@@ -19,7 +19,7 @@ import { getFirestore,
          doc,
          updateDoc,
          deleteDoc } from "firebase/firestore"
-
+import { getStorage } from "firebase/storage";
 /* === Firebase Setup === */
 /* IMPORTANT: Replace this with your own firebaseConfig when doing challenges */
 const firebaseConfig = {
@@ -37,6 +37,7 @@ const auth = getAuth(app)
 const provider = new GoogleAuthProvider()
 const db = getFirestore(app)
 const analytics = getAnalytics(app);
+const storage = getStorage(app)
 /* === UI === */
 
 /* == UI - Elements == */
@@ -48,6 +49,8 @@ const signInWithGoogleButtonEl = document.getElementById("sign-in-with-google-bt
 
 const emailInputEl = document.getElementById("email-input")
 const passwordInputEl = document.getElementById("password-input")
+const userNameEl = document.getElementById("username-input").value
+const userDisplayName = userNameEl
 
 const signInButtonEl = document.getElementById("sign-in-btn")
 const createAccountButtonEl = document.getElementById("create-account-btn")
@@ -67,6 +70,7 @@ const allFilterButtonEl = document.getElementById("all-filter-btn")
 const filterButtonEls = document.getElementsByClassName("filter-btn")
 
 const postsEl = document.getElementById("posts")
+
 
 /* == UI - Event Listeners == */
 
@@ -100,6 +104,7 @@ const collectionName = "posts"
 onAuthStateChanged(auth, (user) => {
     if (user) {
         showLoggedInView()
+        
         showProfilePicture(userProfilePictureEl, user)
         showUserGreeting(userGreetingEl, user)
         updateFilterButtonStyle(allFilterButtonEl)
@@ -410,30 +415,106 @@ function clearAuthFields() {
 }
 
 function showProfilePicture(imgElement, user) {
-    const photoURL = user.photoURL
     
-    if (photoURL) {
-        imgElement.src = photoURL
-    } else {
-        imgElement.src = "assets/images/default-profile-picture.jpeg"
+// Get references to HTML elements
+const fileInput = document.getElementById('file-input');
+const userProfilePicture = document.getElementById('user-profile-picture');
+const profilePictureContainer = document.querySelector('.profile-picture-container');
+
+// Function to upload image to Firebase Storage
+function uploadImageToStorage(file) {
+    const user = firebase.auth().currentUser;
+    if (user) {
+        const storageRef = firebase.storage().ref('profile_images/' + user.uid + '/' + file.name);
+        return storageRef.put(file);
     }
+    return Promise.reject("User not authenticated");
+}
+
+// Function to update the user's profile with the new image URL
+function updateProfileWithImageUrl(downloadURL) {
+    const user = firebase.auth().currentUser;
+    user.updateProfile({
+        photoURL: downloadURL
+    })
+    .then(() => {
+        // Update the displayed profile picture
+        userProfilePicture.src = downloadURL;
+    })
+    .catch(error => {
+        console.error('Error updating user profile:', error);
+    });
+}
+
+// Add an event listener to the file input to handle profile picture selection
+fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+
+    if (file) {
+        // Upload the new profile picture to Firebase Storage
+        uploadImageToStorage(file)
+            .then(snapshot => snapshot.ref.getDownloadURL())
+            .then(downloadURL => {
+                // Update the user's profile with the new image URL
+                updateProfileWithImageUrl(downloadURL);
+            })
+            .catch(error => {
+                console.error('Error uploading image:', error);
+            });
+    }
+});
+
+// Add an event listener to the profile picture container for hovering
+profilePictureContainer.addEventListener('mouseenter', () => {
+    profilePictureContainer.classList.add('hovered');
+});
+
+profilePictureContainer.addEventListener('mouseleave', () => {
+    profilePictureContainer.classList.remove('hovered');
+});
+
+// Add an event listener to the overlay for clicking
+const overlay = document.querySelector('.overlay');
+overlay.addEventListener('click', () => {
+    fileInput.click(); // Trigger the file input click when the overlay is clicked
+});
 }
 
 function showUserGreeting(element, user) {
-    const displayName = user.displayName;
     const currentDate = new Date();
     const currentHour = currentDate.getHours();
+    let userDisplayName = localStorage.getItem("userDisplayName"); // Retrieve the user's input from local storage
     let greeting;
     let motivationalQuote;
 
-    // Define motivational quotes for each time of day
+    // Define your motivational quotes for each time of day
     const morningQuotes = [
         "Rise up, start fresh, see the bright opportunity in each new day.",
         "The morning sun has a way of turning your worries into shadows.",
-        "Every morning brings new potential, but if you dwell on the misfortunes of the day before, you tend to overlook tremendous opportunities."
+        "Every morning brings new potential, but if you dwell on the misfortunes of the day before, you tend to overlook tremendous opportunities.",
+        "Embrace the day with enthusiasm, for greatness awaits, hidden in the moments you're yet to live.",
+        "Your journey to success begins with the first step out of bed, a reminder that each day is a fresh canvas to paint your aspirations.",
+        "Chase your dreams relentlessly, for they are worth the pursuit, and in the chase, you'll discover your true self.",
+        "The morning sun is a reminder that you can rise after any fall, just as nature renews itself, so can you.",
+        "Believe in yourself, for that's where your true power lies, and self-belief can move mountains.",
+        "Make today amazing by setting positive intentions, as intention shapes reality, make it a masterpiece.",
+        "You are stronger than you think, and today will prove it, showing you the depth of your resilience.",
+        "Don't wait for opportunities, create them each morning, as the architect of your life, design your path.",
+        "Hard work in the morning paves the way for a brighter future, investing your effort is like planting the seeds of your success."
+
     ];
 
     const afternoonQuotes = [
+        "Seize the afternoon with purpose, for it's another chance to make today remarkable.",
+        "In the middle of the day, find your strength, for you've come this far; you can go further.",
+        "Afternoon is a canvas awaiting your creativity; paint it with your accomplishments.",
+        "Just as the sun stands high in the sky, let your aspirations reach their peak in the afternoon.",
+        "Believe in your ability to conquer the challenges of the day, for the afternoon is your proving ground.",
+        "As you tackle the tasks of the afternoon, remember that perseverance is the key to progress.",
+        "Afternoon is the bridge between morning and evening, make it a bridge to success.",
+        "Embrace the challenges of the afternoon, for they are the stepping stones to your goals.",
+        "In the afternoon, productivity is your best friend, and determination is your guide.",
+        "As the sun begins its descent, let your achievements rise in the afternoon's light.",
         "Success is not final, failure is not fatal: it is the courage to continue that counts. - Winston Churchill",
         "The only way to do great work is to love what you do. - Steve Jobs",
         "The afternoon knows what the morning never suspected. - Swedish Proverb"
@@ -442,7 +523,17 @@ function showUserGreeting(element, user) {
     const eveningQuotes = [
         "The evening's the best part of the day. You've done your day's work. Now you can put your feet up and enjoy it. - Kazuo Ishiguro",
         "Don't watch the clock; do what it does. Keep going. - Sam Levenson",
-        "Evenings are the beautifully sweet spot between the harsh light of the day and the dead darkness of night."
+        "Evenings are the beautifully sweet spot between the harsh light of the day and the dead darkness of night.",
+        "As the sun sets on the day, reflect on your accomplishments and be proud of your progress.",
+        "Evening is a time to unwind, but also a time to plan for a better tomorrow.",
+        "In the quiet of the evening, find the strength to finish what you started in the morning.",
+        "The evening is a reminder that even the darkest hours can't stop the light from returning.",
+        "Embrace the peace of the evening and let it rejuvenate your spirit for what lies ahead.",
+        "As day turns to night, remember that each evening is an opportunity for personal growth.",
+        "Your evening is a treasure chest of dreams; open it and set new goals for the future.",
+        "In the calm of the evening, find clarity and purpose for the days to come.",
+        "The evening sky is painted with dreams; it's time to make them a reality.",
+        "As the stars appear in the evening sky, let your aspirations shine brightly in your heart."
     ];
 
     // Function to select a random quote from an array
@@ -451,40 +542,44 @@ function showUserGreeting(element, user) {
         return quotesArray[randomIndex];
     }
 
-    if (displayName) {
-        const userFirstName = displayName.split(" ")[0];
-
-        if (currentHour >= 5 && currentHour < 12) {
-            greeting = `Good morning, ${userFirstName}! How are you feeling today?`;
-            motivationalQuote = getRandomQuote(morningQuotes);
-        } else if (currentHour >= 12 && currentHour < 17) {
-            greeting = `Good afternoon, ${userFirstName}! How are you feeling today?`;
-            motivationalQuote = getRandomQuote(afternoonQuotes);
-        } else {
-            greeting = `Good evening, ${userFirstName}! How are you feeling today?`;
-            motivationalQuote = getRandomQuote(eveningQuotes);
-        }
+    if (user.displayName) {
+        const userFirstName = user.displayName.split(" ")[0];
+        greeting = `Hello, ${userFirstName}! `;
+    } else if (userDisplayName) {
+        const userFirstName = userDisplayName.split(" ")[0];
+        greeting = `Hello, ${userFirstName}! `;
     } else {
-        if (currentHour >= 5 && currentHour < 12) {
-            greeting = `Good morning, friend! How are you feeling today?`;
-            motivationalQuote = getRandomQuote(morningQuotes);
-        } else if (currentHour >= 12 && currentHour < 17) {
-            greeting = `Good afternoon, friend! How are you feeling today?`;
-            motivationalQuote = getRandomQuote(afternoonQuotes);
-        } else {
-            greeting = `Good evening, friend! How are you feeling today?`;
-            motivationalQuote = getRandomQuote(eveningQuotes);
-        }
+        greeting = "Hello, friend! ";
     }
 
+    if (currentHour >= 5 && currentHour < 12) {
+        greeting += "Good morning!";
+        motivationalQuote = getRandomQuote(morningQuotes);
+    } else if (currentHour >= 12 && currentHour < 17) {
+        greeting += "Good afternoon!";
+        motivationalQuote = getRandomQuote(afternoonQuotes);
+    } else {
+        greeting += "Good evening!";
+        motivationalQuote = getRandomQuote(eveningQuotes);
+    }
+    
     // Combine the greeting and motivational quote
-    const combinedMessage = `${greeting}<br><div class="quote">${motivationalQuote}</div>`;
+    const combinedMessage = `${greeting} How are you feeling today?<br><div class="quote">${motivationalQuote}</div>`;
     element.innerHTML = combinedMessage;
 
-    //Reduce font of motivation
+
+    // Reduce font size of motivation
     const quoteElement = element.querySelector('.quote');
     quoteElement.style.fontSize = 'smaller';
 }
+
+// Save the user's input to local storage
+document.getElementById("username-input").addEventListener("input", function() {
+    const userDisplayName = this.value;
+    localStorage.setItem("userDisplayName", userDisplayName);
+});
+
+
 
 
 function displayDate(firebaseDate) {
@@ -585,38 +680,9 @@ function selectFilter(event) {
     fetchPostsFromPeriod(selectedFilterPeriod, user)
 }
 
-// Update Profile Picture
-const fileInput = document.getElementById('file-input');
-const userProfilePicture = document.getElementById('user-profile-picture');
-const profilePictureContainer = document.querySelector('.profile-picture-container');
 
-// Add an event listener to the file input to handle profile picture selection
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
+// Get references to HTML elements
 
-    if (file) {
-        // Display the selected profile picture in the img element
-        const imageUrl = URL.createObjectURL(file);
-        userProfilePicture.src = imageUrl;
-
-        // Here, you can upload the new profile picture to Firebase Storage and update the user's profile as shown in the previous response
-    }
-});
-
-// Add an event listener to the profile picture container for hovering
-profilePictureContainer.addEventListener('mouseenter', () => {
-    profilePictureContainer.classList.add('hovered');
-});
-
-profilePictureContainer.addEventListener('mouseleave', () => {
-    profilePictureContainer.classList.remove('hovered');
-});
-
-// Add an event listener to the overlay for clicking
-const overlay = document.querySelector('.overlay');
-overlay.addEventListener('click', () => {
-    fileInput.click(); // Trigger the file input click when the overlay is clicked
-});
 
 anime.timeline({loop: true})
   .add({
@@ -658,3 +724,63 @@ anime.timeline({loop: true})
     easing: "easeOutExpo",
     delay: 1000
   });
+
+
+//   User Profile Picture
+// Get a reference to the image element you want to update
+const imageElement = document.querySelector("user-profile-picture"); // Update this selector as needed
+
+// Add an event listener to the file input element
+fileInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+
+    // Create a storage reference to the root of your Firebase Storage
+    const storageRef = firebase.storage().ref();
+
+    // Create a reference to the file you want to upload
+    const imageRef = storageRef.child("images/" + file.name);
+
+    // Upload the file to Firebase Storage
+    const uploadTask = imageRef.put(file);
+
+    // Listen for the state changes, like progress, error, and completion
+    uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+            // Handle progress, if needed
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Upload is ${progress}% done`);
+        },
+        (error) => {
+            // Handle errors, if any
+            console.error("Error uploading image: ", error);
+        },
+        () => {
+            // When the upload is complete, get the download URL
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                // Update the image source with the download URL
+                imageElement.src = downloadURL;
+            });
+        }
+    );
+});
+
+// Side panel button for settings 
+
+const audioPlayer = document.getElementById("background-audio");
+const playButton = document.getElementById("play-button");
+const pauseButton = document.getElementById("pause-button");
+const volumeSlider = document.getElementById("volume-slider");
+
+playButton.addEventListener("click", function() {
+    audioPlayer.play();
+});
+
+pauseButton.addEventListener("click", function() {
+    audioPlayer.pause();
+});
+
+volumeSlider.addEventListener("input", function() {
+    audioPlayer.volume = volumeSlider.value;
+});
+
