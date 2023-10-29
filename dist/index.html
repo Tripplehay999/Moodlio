@@ -2,50 +2,86 @@
 <html>
 
     <head>
-        <title>Moody</title>
+        <title>Moodlio</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Cabin:wght@400;500;600;700&family=Calistoga&display=swap" rel="stylesheet">
-		
-      <script type="module" crossorigin src="/assets/index-5341ca4c.js"></script>
-      <link rel="stylesheet" href="/assets/index-2a206ec7.css">
+		<script src="https://kit.fontawesome.com/f939e23986.js" crossorigin="anonymous"></script>
+        
+      <script type="module" crossorigin src="/assets/index-2390e82d.js"></script>
+      <link rel="stylesheet" href="/assets/index-81e447f9.css">
     </head>
-
+ 
     <body>
+        <div id="loader-container">
+            <div class="loader"></div>
+          </div>
         <section id="logged-out-view">
+           
+              
+               
             <div class="container">
-                <h1 class="app-title">Moody</h1>
-                
+            
+                <h1 class="app-title">Moodlio</h1>
+                <h1 class="ml5">
+                    <span class="text-wrapper">
+                      <span class="line line1"></span>
+                      <span class="letters letters-left">Dream</span>
+                      <span class="letters ampersand">&amp;</span>
+                      <span class="letters letters-right">Conquer</span>
+                      <span class="line line2"></span>
+                    </span>
+                  </h1>
+                  
+                  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/2.0.2/anime.min.js"></script>
                 <div class="provider-buttons">
                     <button id="sign-in-with-google-btn" class="provider-btn">
                         <img src="/assets/google-b6cab7e4.png" class="google-btn-logo">
                         Sign in with Google
                     </button>
                 </div>
-                
+        
+
                 <div class="auth-fields-and-buttons">
+                    <input id="username-input" type="text" placeholder="Name">
                     <input id="email-input" type="email" placeholder="Email">
                     <input id="password-input" type="password" placeholder="Password">
                     
                     <button id="sign-in-btn" class="primary-btn">Sign in</button>
                     <button id="create-account-btn" class="secondary-btn">Create Account</button>
+
                 </div>
+                
             </div>
+       
         </section>
         
         <section id="logged-in-view">
             <div class="container">
                 <nav>
-                    <button id="sign-out-btn" class="icon-btn">
-                        <img src="/assets/icon-sign-out-d1772209.svg" class="icon-img-btn">
+                    <button id="settings-btn" class="icon-btn">
+                             <img src="/assets/settings-f2b1450f.svg" class="icon-img-btn">
                     </button>
+
+                    <button id="sign-out-btn" class="icon-btn">
+                        <img src="/assets/icon-sign-out-5e610aa0.svg" class="icon-img-btn-2">
+                    </button>
+                    
                 </nav>
                 
                 <div class="app-container">
                     <div class="user-section">
-                        <img id="user-profile-picture">
-                        <h2 id="user-greeting"></h2>
+                        <div class="profile-picture-container">
+                            <img id="user-profile-picture" src="/assets/default-profile-picture-5917ac1f.jpeg" alt="Profile Picture">
+                            <div class="overlay">
+                                <label for="file-input">Change Picture</label>
+                                <input type="file" id="file-input" accept="image/*">
+                            </div>
+                        </div>
+                            <h2 id="user-greeting"></h2>
+                        
+                        
                     </div>
                     
                     <div class="mood-emojis">
@@ -72,7 +108,7 @@
                     </div>
                     
                     <div class="post-section">
-                        <textarea id="post-input" placeholder="Write down how you're feeling..."></textarea>
+                        <textarea id="post-input" placeholder="Express how you're feeling..."></textarea>
                         <button id="post-btn" class="primary-btn">Post</button>
                     </div>
                     
@@ -83,7 +119,10 @@
                             <button id="month-filter-btn" class="filter-btn">Month</button>
                             <button id="all-filter-btn" class="filter-btn">All</button>
                         </div>
-                        
+                        <audio id="background-audio" controls autoplay loop>
+                            <source src="/assets/chosic-dd738437.mp3" type="audio/mp3">
+                            Your browser does not support the audio element.
+                        </audio>
                         <div id="posts" class="posts-section">
                         </div>
                     </div>
@@ -91,6 +130,13 @@
             </div>
         </section>
         
+        
+        <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-storage.js"></script>
+        <script>
+            window.addEventListener('load', () => {
+                document.getElementById('loader-container').style.display = 'none';
+            });
+        </script>
         
     </body>
 

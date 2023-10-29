@@ -415,70 +415,41 @@ function clearAuthFields() {
 }
 
 function showProfilePicture(imgElement, user) {
-    
-// Get references to HTML elements
-const fileInput = document.getElementById('file-input');
-const userProfilePicture = document.getElementById('user-profile-picture');
-const profilePictureContainer = document.querySelector('.profile-picture-container');
-
-// Function to upload image to Firebase Storage
-function uploadImageToStorage(file) {
-    const user = firebase.auth().currentUser;
-    if (user) {
-        const storageRef = firebase.storage().ref('profile_images/' + user.uid + '/' + file.name);
-        return storageRef.put(file);
-    }
-    return Promise.reject("User not authenticated");
-}
-
-// Function to update the user's profile with the new image URL
-function updateProfileWithImageUrl(downloadURL) {
-    const user = firebase.auth().currentUser;
-    user.updateProfile({
-        photoURL: downloadURL
-    })
-    .then(() => {
-        // Update the displayed profile picture
-        userProfilePicture.src = downloadURL;
-    })
-    .catch(error => {
-        console.error('Error updating user profile:', error);
+    // Get references to HTML elements
+    const fileInput = document.getElementById('file-input');
+    const userProfilePicture = document.getElementById('user-profile-picture');
+    const profilePictureContainer = document.querySelector('.profile-picture-container');
+  
+    // Add an event listener to the file input element
+    fileInput.addEventListener('change', function(event) {
+      // Get the selected file
+      const file = event.target.files[0];
+  
+      // Create a FileReader object
+      const reader = new FileReader();
+  
+      // Set the callback function for when the file is loaded
+      reader.onload = function(event) {
+        // Set the source of the image element to the loaded file
+        userProfilePicture.src = event.target.result;
+  
+        // Save the image data to localStorage
+        localStorage.setItem('profilePicture', event.target.result);
+      };
+  
+      // Read the file as a data URL
+      reader.readAsDataURL(file);
     });
-}
-
-// Add an event listener to the file input to handle profile picture selection
-fileInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-
-    if (file) {
-        // Upload the new profile picture to Firebase Storage
-        uploadImageToStorage(file)
-            .then(snapshot => snapshot.ref.getDownloadURL())
-            .then(downloadURL => {
-                // Update the user's profile with the new image URL
-                updateProfileWithImageUrl(downloadURL);
-            })
-            .catch(error => {
-                console.error('Error uploading image:', error);
-            });
+  
+    // Check if there is a saved profile picture in localStorage
+    const savedProfilePicture = localStorage.getItem('profilePicture');
+    if (savedProfilePicture) {
+      // Set the source of the image element to the saved profile picture
+      userProfilePicture.src = savedProfilePicture;
     }
-});
-
-// Add an event listener to the profile picture container for hovering
-profilePictureContainer.addEventListener('mouseenter', () => {
-    profilePictureContainer.classList.add('hovered');
-});
-
-profilePictureContainer.addEventListener('mouseleave', () => {
-    profilePictureContainer.classList.remove('hovered');
-});
-
-// Add an event listener to the overlay for clicking
-const overlay = document.querySelector('.overlay');
-overlay.addEventListener('click', () => {
-    fileInput.click(); // Trigger the file input click when the overlay is clicked
-});
-}
+  }
+  
+  
 
 function showUserGreeting(element, user) {
     const currentDate = new Date();
